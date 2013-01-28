@@ -1,5 +1,6 @@
 /* NSGA-II routine (implementation of the 'main' function) */
 
+# define _XOPEN_SOURCE
 # include <stdio.h>
 # include <stdlib.h>
 # include <math.h>
@@ -7,6 +8,10 @@
 
 # include "global.h"
 # include "rand.h"
+
+# define BOOLEAN int
+# define TRUE 0
+# define FALSE 1
 
 int nreal;
 int nbin;
@@ -30,7 +35,7 @@ double *max_realvar;
 double *min_binvar;
 double *max_binvar;
 int bitlength;
-int choice;
+int choice; 
 int obj1;
 int obj2;
 int obj3;
@@ -39,13 +44,15 @@ int angle2;
 
 int main (int argc, char **argv)
 {
+    BOOLEAN isFileInput;
     int i;
     FILE *fpt1;
     FILE *fpt2;
     FILE *fpt3;
     FILE *fpt4;
     FILE *fpt5;
-    FILE *gp;
+    FILE *gp; /* GNU-Plot */
+    FILE *inputFile;
     population *parent_pop;
     population *child_pop;
     population *mixed_pop;
@@ -60,6 +67,15 @@ int main (int argc, char **argv)
         printf("\n Entered seed value is wrong, seed value must be in (0,1) \n");
         exit(1);
     }
+    if (argc == 3)
+    {
+	inputFile = fopen(argv[2],"r");
+	isFileInput = TRUE;
+    }
+    else
+    {
+	isFileInput = FALSE;
+    }
     fpt1 = fopen("initial_pop.out","w");
     fpt2 = fopen("final_pop.out","w");
     fpt3 = fopen("best_pop.out","w");
@@ -71,88 +87,183 @@ int main (int argc, char **argv)
     fprintf(fpt4,"# This file contains the data of all generations\n");
     fprintf(fpt5,"# This file contains information about inputs as read by the program\n");
     printf("\n Enter the problem relevant and algorithm relevant parameters ... ");
+
+    /* Input Population Size */
     printf("\n Enter the population size (a multiple of 4) : ");
-    scanf("%d",&popsize);
+    if (isFileInput == TRUE)
+    {
+	fscanf(inputFile, "%d", &popsize);
+    }
+    else
+    {
+        scanf("%d",&popsize);
+    }
     if (popsize<4 || (popsize%4)!= 0)
     {
         printf("\n population size read is : %d",popsize);
         printf("\n Wrong population size entered, hence exiting \n");
         exit (1);
     }
+
+    /* Input Number of Generations */
     printf("\n Enter the number of generations : ");
-    scanf("%d",&ngen);
+    if (isFileInput == TRUE)
+    {
+	fscanf(inputFile, "%d", &ngen);
+    }
+    else
+    {
+	scanf("%d",&ngen);
+    }
     if (ngen<1)
     {
         printf("\n number of generations read is : %d",ngen);
         printf("\n Wrong nuber of generations entered, hence exiting \n");
         exit (1);
     }
+
+    /* Input Number of Objective Functions */
     printf("\n Enter the number of objectives : ");
-    scanf("%d",&nobj);
+    if (isFileInput == TRUE)
+    {
+	fscanf(inputFile, "%d", &nobj);
+    }
+    else
+    {
+        scanf("%d",&nobj);
+    }
     if (nobj<1)
     {
         printf("\n number of objectives entered is : %d",nobj);
         printf("\n Wrong number of objectives entered, hence exiting \n");
         exit (1);
     }
+
+    /* Input Number of Constraints */
     printf("\n Enter the number of constraints : ");
-    scanf("%d",&ncon);
+    if (isFileInput == TRUE)
+    {
+	fscanf(inputFile, "%d", &ncon);
+    }
+    else
+    {
+        scanf("%d",&ncon);
+    }
     if (ncon<0)
     {
         printf("\n number of constraints entered is : %d",ncon);
         printf("\n Wrong number of constraints enetered, hence exiting \n");
         exit (1);
     }
+
+    /* Input Number of Real Variables */
     printf("\n Enter the number of real variables : ");
-    scanf("%d",&nreal);
+    if (isFileInput == TRUE)
+    {
+	fscanf(inputFile, "%d", &nreal);
+    }
+    else
+    {
+        scanf("%d",&nreal);
+    }
     if (nreal<0)
     {
         printf("\n number of real variables entered is : %d",nreal);
         printf("\n Wrong number of variables entered, hence exiting \n");
         exit (1);
     }
+
+    /* Input Real Variable Values */
     if (nreal != 0)
     {
         min_realvar = (double *)malloc(nreal*sizeof(double));
         max_realvar = (double *)malloc(nreal*sizeof(double));
+
+        /* Set limits for all Real variables */
         for (i=0; i<nreal; i++)
         {
-            printf ("\n Enter the lower limit of real variable %d : ",i+1);
-            scanf ("%lf",&min_realvar[i]);
-            printf ("\n Enter the upper limit of real variable %d : ",i+1);
-            scanf ("%lf",&max_realvar[i]);
+            if (isFileInput == TRUE)
+            {
+                printf ("\n Enter the lower limit of real variable %d : ",i+1);
+                fscanf (inputFile, "%lf", &min_realvar[i]);
+                printf ("\n Enter the upper limit of real variable %d : ",i+1);
+                fscanf (inputFile, "%lf", &max_realvar[i]);
+            }
+            else
+            {
+                printf ("\n Enter the lower limit of real variable %d : ",i+1);
+                scanf ("%lf",&min_realvar[i]);
+                printf ("\n Enter the upper limit of real variable %d : ",i+1);
+                scanf ("%lf",&max_realvar[i]);
+            }
             if (max_realvar[i] <= min_realvar[i])
             {
                 printf("\n Wrong limits entered for the min and max bounds of real variable, hence exiting \n");
                 exit(1);
             }
         }
+        
+        /* Input corssover probability value */
         printf ("\n Enter the probability of crossover of real variable (0.6-1.0) : ");
-        scanf ("%lf",&pcross_real);
+        if (isFileInput == TRUE)
+        {
+            fscanf(inputFile, "%lf", &pcross_real);
+        }
+        else
+        {
+            scanf ("%lf",&pcross_real);
+        }
         if (pcross_real<0.0 || pcross_real>1.0)
         {
             printf("\n Probability of crossover entered is : %e",pcross_real);
             printf("\n Entered value of probability of crossover of real variables is out of bounds, hence exiting \n");
             exit (1);
         }
+
+        /* Input Mutation Probability value */
         printf ("\n Enter the probablity of mutation of real variables (1/nreal) : ");
-        scanf ("%lf",&pmut_real);
+        if (isFileInput == TRUE)
+        {
+            fscanf(inputFile, "%lf", &pmut_real);
+        }
+        else
+        {
+            scanf ("%lf",&pmut_real);
+        }
         if (pmut_real<0.0 || pmut_real>1.0)
         {
             printf("\n Probability of mutation entered is : %e",pmut_real);
             printf("\n Entered value of probability of mutation of real variables is out of bounds, hence exiting \n");
             exit (1);
         }
+
+        /* Input Crossover Distribution Index */
         printf ("\n Enter the value of distribution index for crossover (5-20): ");
-        scanf ("%lf",&eta_c);
+        if (isFileInput == TRUE)
+        {
+            fscanf (inputFile, "%lf", &eta_c);
+        }
+        else
+        {
+            scanf ("%lf",&eta_c);
+        }
         if (eta_c<=0)
         {
             printf("\n The value entered is : %e",eta_c);
             printf("\n Wrong value of distribution index for crossover entered, hence exiting \n");
             exit (1);
         }
+
+        /* Input Mutation Distribution Index */
         printf ("\n Enter the value of distribution index for mutation (5-50): ");
-        scanf ("%lf",&eta_m);
+        if (isFileInput == TRUE)
+        {
+            fscanf(inputFile, "%lf", &eta_m);
+        }
+        else
+        {
+            scanf ("%lf",&eta_m);
+        }
         if (eta_m<=0)
         {
             printf("\n The value entered is : %e",eta_m);
@@ -160,14 +271,25 @@ int main (int argc, char **argv)
             exit (1);
         }
     }
+
+    /* Input Number of Binary Vaiables */
     printf("\n Enter the number of binary variables : ");
-    scanf("%d",&nbin);
+    if (isFileInput == TRUE)
+    {
+        fscanf(inputFile, "%d", &nbin);
+    }
+    else
+    {
+        scanf("%d",&nbin);
+    }
     if (nbin<0)
     {
         printf ("\n number of binary variables entered is : %d",nbin);
         printf ("\n Wrong number of binary variables entered, hence exiting \n");
         exit(1);
     }
+
+    /* Input Binary Variable Values */
     if (nbin != 0)
     {
         nbits = (int *)malloc(nbin*sizeof(int));
@@ -175,33 +297,71 @@ int main (int argc, char **argv)
         max_binvar = (double *)malloc(nbin*sizeof(double));
         for (i=0; i<nbin; i++)
         {
+            /* Input number of Binary Bits per variable */
             printf ("\n Enter the number of bits for binary variable %d : ",i+1);
-            scanf ("%d",&nbits[i]);
+            if (isFileInput == TRUE)
+            {
+                fscanf(inputFile, "%d",  &nbits[i]);
+            }
+            else
+            {
+                scanf ("%d",&nbits[i]);
+            }
             if (nbits[i] < 1)
             {
                 printf("\n Wrong number of bits for binary variable entered, hence exiting");
                 exit(1);
             }
-            printf ("\n Enter the lower limit of binary variable %d : ",i+1);
-            scanf ("%lf",&min_binvar[i]);
-            printf ("\n Enter the upper limit of binary variable %d : ",i+1);
-            scanf ("%lf",&max_binvar[i]);
+
+            /* Input Limits for Binary Variable */
+            if (isFileInput == TRUE)
+            {
+                printf ("\n Enter the lower limit of binary variable %d : ",i+1);
+                fscanf (inputFile, "%lf",&min_binvar[i]);
+                printf ("\n Enter the upper limit of binary variable %d : ",i+1);
+                fscanf (inputFile, "%lf",&max_binvar[i]);
+            }
+            else
+            {
+                printf ("\n Enter the lower limit of binary variable %d : ",i+1);
+                scanf ("%lf",&min_binvar[i]);
+                printf ("\n Enter the upper limit of binary variable %d : ",i+1);
+                scanf ("%lf",&max_binvar[i]);
+            }
             if (max_binvar[i] <= min_binvar[i])
             {
                 printf("\n Wrong limits entered for the min and max bounds of binary variable entered, hence exiting \n");
                 exit(1);
             }
         }
+
+        /* Input Crossover Probability for Binary Variable */
         printf ("\n Enter the probability of crossover of binary variable (0.6-1.0): ");
-        scanf ("%lf",&pcross_bin);
+        if (isFileInput == TRUE)
+        {
+            fscanf(inputFile, "%lf", &pcross_bin);
+        }
+        else
+        {
+            scanf ("%lf",&pcross_bin);
+        }
         if (pcross_bin<0.0 || pcross_bin>1.0)
         {
             printf("\n Probability of crossover entered is : %e",pcross_bin);
             printf("\n Entered value of probability of crossover of binary variables is out of bounds, hence exiting \n");
             exit (1);
         }
+
+        /* Input Mutation Probability of Binary variables */
         printf ("\n Enter the probability of mutation of binary variables (1/nbits): ");
-        scanf ("%lf",&pmut_bin);
+        if (isFileInput == TRUE)
+        {
+            fscanf(inputFile, "%lf", &pmut_bin);
+        }
+        else
+        {
+            scanf ("%lf",&pmut_bin);
+        }
         if (pmut_bin<0.0 || pmut_bin>1.0)
         {
             printf("\n Probability of mutation entered is : %e",pmut_bin);
@@ -209,19 +369,35 @@ int main (int argc, char **argv)
             exit (1);
         }
     }
+
     if (nreal==0 && nbin==0)
     {
         printf("\n Number of real as well as binary variables, both are zero, hence exiting \n");
         exit(1);
     }
+
     choice=0;
+
+    /* Check if GNU-Plot exists */
+    
+
+    /* Use GNU-Plot to Plot Realtime Results? */
     printf("\n Do you want to use gnuplot to display the results realtime (0 for NO) (1 for yes) : ");
-    scanf("%d",&choice);
+    if (isFileInput == TRUE)
+    {
+        fscanf(inputFile, "%d", &choice);
+    }
+    else
+    {
+        scanf("%d",&choice);
+    }
     if (choice!=0 && choice!=1)
     {
         printf("\n Entered the wrong choice, hence exiting, choice entered was %d\n",choice);
         exit(1);
     }
+
+    /* Input GNU-Plot Data */
     if (choice==1)
     {
         gp = popen(GNUPLOT_COMMAND,"w");
@@ -231,84 +407,175 @@ int main (int argc, char **argv)
             printf("\n Edit the string to suit your system configuration and rerun the program\n");
             exit(1);
         }
+
+        /* Set Objective to Axis Mappings */
+        /* A 2-D Graph is generated for a problem with 2 Objective Functions */
         if (nobj==2)
         {
+            /* Input X-Axis Function */
             printf("\n Enter the objective for X axis display : ");
-            scanf("%d",&obj1);
+            if (isFileInput == TRUE)
+            {
+                fscanf(inputFile, "%d", &obj1);
+            }
+            else
+            {
+                scanf("%d",&obj1);
+            }
             if (obj1<1 || obj1>nobj)
             {
                 printf("\n Wrong value of X objective entered, value entered was %d\n",obj1);
                 exit(1);
             }
+
+            /* Input Y-Axis Function */
             printf("\n Enter the objective for Y axis display : ");
-            scanf("%d",&obj2);
+            if (isFileInput == TRUE)
+            {
+                fscanf(inputFile, "%d", &obj2);
+            }
+            else
+            {
+                scanf("%d",&obj2);
+            }
             if (obj2<1 || obj2>nobj)
             {
                 printf("\n Wrong value of Y objective entered, value entered was %d\n",obj2);
                 exit(1);
             }
+
             obj3 = -1;
         }
         else
         {
+            /* Select between 2-D and 3-D Display for greater than 2 Objective Functions */
             printf("\n #obj > 2, 2D display or a 3D display ?, enter 2 for 2D and 3 for 3D :");
-            scanf("%d",&choice);
+            if (isFileInput == TRUE)
+            {
+                fscanf(inputFile, "%d", &choice);
+            }
+            else
+            {
+                scanf("%d",&choice);
+            }
             if (choice!=2 && choice!=3)
             {
                 printf("\n Entered the wrong choice, hence exiting, choice entered was %d\n",choice);
                 exit(1);
             }
+
+            /* For a 2-D Graph */ /* Should convert to function. */
             if (choice==2)
             {
+                /* Input X-Axis Function */
                 printf("\n Enter the objective for X axis display : ");
-                scanf("%d",&obj1);
+                if (isFileInput == TRUE)
+                {
+                    fscanf(inputFile, "%d", &obj1);
+                }
+                else
+                {
+                    scanf("%d",&obj1);
+                }
                 if (obj1<1 || obj1>nobj)
                 {
                     printf("\n Wrong value of X objective entered, value entered was %d\n",obj1);
                     exit(1);
                 }
+
+                /* Input Y-Axis Function */
                 printf("\n Enter the objective for Y axis display : ");
-                scanf("%d",&obj2);
+                if (isFileInput == TRUE)
+                {
+                    fscanf(inputFile, "%d", &obj2);
+                }
+                else
+                {
+                    scanf("%d",&obj2);
+                }
                 if (obj2<1 || obj2>nobj)
                 {
                     printf("\n Wrong value of Y objective entered, value entered was %d\n",obj2);
                     exit(1);
                 }
+
                 obj3 = -1;
             }
-            else
+            else /* For 3-D Display */
             {
+                /* Input X-Axis Function */
                 printf("\n Enter the objective for X axis display : ");
-                scanf("%d",&obj1);
+                if (isFileInput == TRUE)
+                {
+                    fscanf(inputFile, "%d", &obj1);
+                }
+                else
+                {
+                    scanf("%d",&obj1);
+                }
                 if (obj1<1 || obj1>nobj)
                 {
                     printf("\n Wrong value of X objective entered, value entered was %d\n",obj1);
                     exit(1);
                 }
+
+                /* Input Y-Axis Function */
                 printf("\n Enter the objective for Y axis display : ");
-                scanf("%d",&obj2);
+                if (isFileInput == TRUE)
+                {
+                    fscanf(inputFile, "%d", &obj2);
+                }
+                else
+                {
+                    scanf("%d",&obj2);
+                }
                 if (obj2<1 || obj2>nobj)
                 {
                     printf("\n Wrong value of Y objective entered, value entered was %d\n",obj2);
                     exit(1);
                 }
+
+                /* Input Z-Axis Function */
                 printf("\n Enter the objective for Z axis display : ");
-                scanf("%d",&obj3);
+                if (isFileInput == TRUE)
+                {
+                    fscanf(inputFile, "%d", &obj3);
+                }
+                else
+                {
+                    scanf("%d",&obj3);
+                }
                 if (obj3<1 || obj3>nobj)
                 {
                     printf("\n Wrong value of Z objective entered, value entered was %d\n",obj3);
                     exit(1);
                 }
+
+                /* Input Eye Angle */
                 printf("\n You have chosen 3D display, hence location of eye required \n");
                 printf("\n Enter the first angle (an integer in the range 0-180) (if not known, enter 60) :");
-                scanf("%d",&angle1);
+                if (isFileInput == TRUE)
+                {
+                    fscanf(inputFile, "%d", &angle1);
+                }
+                else
+                {
+                    scanf("%d",&angle1);
+                }
                 if (angle1<0 || angle1>180)
                 {
                     printf("\n Wrong value for first angle entered, hence exiting \n");
                     exit(1);
                 }
                 printf("\n Enter the second angle (an integer in the range 0-360) (if not known, enter 30) :");
-                scanf("%d",&angle2);
+                if (isFileInput == TRUE)
+                {
+                    fscanf(inputFile, "%d", &angle2);
+                }
+                else
+                {
+                    scanf("%d",&angle2);
+                }
                 if (angle2<0 || angle2>360)
                 {
                     printf("\n Wrong value for second angle entered, hence exiting \n");
@@ -381,7 +648,10 @@ int main (int argc, char **argv)
     report_pop(parent_pop,fpt4);
     printf("\n gen = 1");
     fflush(stdout);
-    if (choice!=0)    onthefly_display (parent_pop,gp,1);
+    if (choice!=0)
+    {
+        onthefly_display (parent_pop,gp,1);
+    }
     fflush(fpt1);
     fflush(fpt2);
     fflush(fpt3);
@@ -417,6 +687,8 @@ int main (int argc, char **argv)
         fprintf(fpt5,"\n Number of crossover of binary variable = %d",nbincross);
         fprintf(fpt5,"\n Number of mutation of binary variable = %d",nbinmut);
     }
+
+    /* Flushing Streams and Cleanup */
     fflush(stdout);
     fflush(fpt1);
     fflush(fpt2);
@@ -428,6 +700,10 @@ int main (int argc, char **argv)
     fclose(fpt3);
     fclose(fpt4);
     fclose(fpt5);
+    if (isFileInput == TRUE)
+    {
+    	fclose(inputFile);
+    }
     if (choice!=0)
     {
         pclose(gp);

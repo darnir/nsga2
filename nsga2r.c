@@ -75,6 +75,7 @@ int main (int argc, char **argv)
     else
     {
 	isFileInput = FALSE;
+        inputFile = fopen("input.in","w");
     }
     fpt1 = fopen("initial_pop.out","w");
     fpt2 = fopen("final_pop.out","w");
@@ -97,6 +98,7 @@ int main (int argc, char **argv)
     else
     {
         scanf("%d",&popsize);
+        fprintf(inputFile, "%d\n", popsize);
     }
     if (popsize<4 || (popsize%4)!= 0)
     {
@@ -114,6 +116,7 @@ int main (int argc, char **argv)
     else
     {
 	scanf("%d",&ngen);
+	fprintf(inputFile, "%d\n", ngen);
     }
     if (ngen<1)
     {
@@ -131,6 +134,7 @@ int main (int argc, char **argv)
     else
     {
         scanf("%d",&nobj);
+        fprintf(inputFile, "%d\n", nobj);
     }
     if (nobj<1)
     {
@@ -148,6 +152,7 @@ int main (int argc, char **argv)
     else
     {
         scanf("%d",&ncon);
+        fprintf(inputFile, "%d\n", ncon);
     }
     if (ncon<0)
     {
@@ -165,6 +170,7 @@ int main (int argc, char **argv)
     else
     {
         scanf("%d",&nreal);
+        fprintf(inputFile, "%d\n", nreal);
     }
     if (nreal<0)
     {
@@ -193,8 +199,10 @@ int main (int argc, char **argv)
             {
                 printf ("\n Enter the lower limit of real variable %d : ",i+1);
                 scanf ("%lf",&min_realvar[i]);
+                fprintf (inputFile, "%f\n", min_realvar[i]);
                 printf ("\n Enter the upper limit of real variable %d : ",i+1);
                 scanf ("%lf",&max_realvar[i]);
+                fprintf (inputFile, "%f\n", max_realvar[i]);
             }
             if (max_realvar[i] <= min_realvar[i])
             {
@@ -212,6 +220,7 @@ int main (int argc, char **argv)
         else
         {
             scanf ("%lf",&pcross_real);
+            fprintf (inputFile, "%f\n", pcross_real);
         }
         if (pcross_real<0.0 || pcross_real>1.0)
         {
@@ -229,6 +238,7 @@ int main (int argc, char **argv)
         else
         {
             scanf ("%lf",&pmut_real);
+            fprintf (inputFile, "%f\n", pmut_real);
         }
         if (pmut_real<0.0 || pmut_real>1.0)
         {
@@ -246,6 +256,7 @@ int main (int argc, char **argv)
         else
         {
             scanf ("%lf",&eta_c);
+            fprintf (inputFile, "%f\n", eta_c);
         }
         if (eta_c<=0)
         {
@@ -263,6 +274,7 @@ int main (int argc, char **argv)
         else
         {
             scanf ("%lf",&eta_m);
+            fprintf (inputFile, "%f\n", eta_m);
         }
         if (eta_m<=0)
         {
@@ -281,6 +293,7 @@ int main (int argc, char **argv)
     else
     {
         scanf("%d",&nbin);
+        fprintf(inputFile, "%d\n", nbin);
     }
     if (nbin<0)
     {
@@ -306,6 +319,7 @@ int main (int argc, char **argv)
             else
             {
                 scanf ("%d",&nbits[i]);
+                fprintf (inputFile, "%d\n", nbits[i]);
             }
             if (nbits[i] < 1)
             {
@@ -325,8 +339,10 @@ int main (int argc, char **argv)
             {
                 printf ("\n Enter the lower limit of binary variable %d : ",i+1);
                 scanf ("%lf",&min_binvar[i]);
+                fprintf (inputFile, "%f\n", min_binvar[i]);
                 printf ("\n Enter the upper limit of binary variable %d : ",i+1);
                 scanf ("%lf",&max_binvar[i]);
+                fprintf (inputFile, "%f\n", max_binvar[i]);
             }
             if (max_binvar[i] <= min_binvar[i])
             {
@@ -344,6 +360,7 @@ int main (int argc, char **argv)
         else
         {
             scanf ("%lf",&pcross_bin);
+            fprintf (inputFile, "%f\n", pcross_bin);
         }
         if (pcross_bin<0.0 || pcross_bin>1.0)
         {
@@ -361,6 +378,7 @@ int main (int argc, char **argv)
         else
         {
             scanf ("%lf",&pmut_bin);
+            fprintf (inputFile, "%f\n", pmut_bin);
         }
         if (pmut_bin<0.0 || pmut_bin>1.0)
         {
@@ -390,6 +408,7 @@ int main (int argc, char **argv)
     else
     {
         scanf("%d",&choice);
+        fprintf(inputFile, "%d\n", choice);
     }
     if (choice!=0 && choice!=1)
     {
@@ -421,6 +440,7 @@ int main (int argc, char **argv)
             else
             {
                 scanf("%d",&obj1);
+                fprintf (inputFile, "%d\n", obj1);
             }
             if (obj1<1 || obj1>nobj)
             {
@@ -432,11 +452,12 @@ int main (int argc, char **argv)
             printf("\n Enter the objective for Y axis display : ");
             if (isFileInput == TRUE)
             {
-                fscanf(inputFile, "%d", &obj2);
+                fscanf (inputFile, "%d", &obj2);
             }
             else
             {
                 scanf("%d",&obj2);
+                fprintf (inputFile, "%d\n", obj2);
             }
             if (obj2<1 || obj2>nobj)
             {
@@ -457,6 +478,7 @@ int main (int argc, char **argv)
             else
             {
                 scanf("%d",&choice);
+                fprintf(inputFile, "%d\n", choice);
             }
             if (choice!=2 && choice!=3)
             {
@@ -476,6 +498,7 @@ int main (int argc, char **argv)
                 else
                 {
                     scanf("%d",&obj1);
+                    fprintf(inputFile, "%d\n", obj1);
                 }
                 if (obj1<1 || obj1>nobj)
                 {
@@ -492,6 +515,7 @@ int main (int argc, char **argv)
                 else
                 {
                     scanf("%d",&obj2);
+                    fprintf(inputFile, "%d\n", obj2);
                 }
                 if (obj2<1 || obj2>nobj)
                 {
@@ -512,6 +536,7 @@ int main (int argc, char **argv)
                 else
                 {
                     scanf("%d",&obj1);
+                    fprintf(inputFile, "%d\n", obj1);
                 }
                 if (obj1<1 || obj1>nobj)
                 {
@@ -528,6 +553,7 @@ int main (int argc, char **argv)
                 else
                 {
                     scanf("%d",&obj2);
+                    fprintf(inputFile, "%d\n", obj2);
                 }
                 if (obj2<1 || obj2>nobj)
                 {
@@ -544,6 +570,7 @@ int main (int argc, char **argv)
                 else
                 {
                     scanf("%d",&obj3);
+                    fprintf(inputFile, "%d\n", obj3);
                 }
                 if (obj3<1 || obj3>nobj)
                 {
@@ -561,6 +588,7 @@ int main (int argc, char **argv)
                 else
                 {
                     scanf("%d",&angle1);
+                    fprintf(inputFile, "%d\n", angle1);
                 }
                 if (angle1<0 || angle1>180)
                 {
@@ -575,6 +603,7 @@ int main (int argc, char **argv)
                 else
                 {
                     scanf("%d",&angle2);
+                    fprintf(inputFile, "%d\n", angle2);
                 }
                 if (angle2<0 || angle2>360)
                 {
@@ -703,6 +732,11 @@ int main (int argc, char **argv)
     if (isFileInput == TRUE)
     {
     	fclose(inputFile);
+    }
+    else
+    {
+        fflush(inputFile);
+        fclose(inputFile);
     }
     if (choice!=0)
     {

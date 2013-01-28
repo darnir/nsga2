@@ -58,7 +58,7 @@ int main (int argc, char **argv)
     population *mixed_pop;
     if (argc<2)
     {
-        printf("\n Usage ./nsga2r random_seed \n");
+        printf("\n Usage ./nsga2r random_seed [input_file] \n");
         exit(1);
     }
     seed = (double)atof(argv[1]);

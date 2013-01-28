@@ -8,3 +8,5 @@ todo
 nsga2r
 *~
 cscope*
+tags
+*.c#
